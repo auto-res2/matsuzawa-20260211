@@ -3,12 +3,7 @@
 
 defaults:
   - _self_
-
-# WandB configuration
-wandb:
-  entity: "airas"
-  project: "2026-02-11"
-  mode: "online"  # online, offline, or disabled
+  - runs: ???  # Must be specified via run=<run_id> on command line
 
 # Execution mode
 mode: "main"  # main, sanity_check, or pilot
@@ -22,6 +17,6 @@ cache_dir: "./.cache"
 # Hydra run directory (prevent clutter)
 hydra:
   run:
-    dir: ${results_dir}/${run.run_id}
+    dir: ${results_dir}/${run_id}
   job:
     chdir: false  # don't change working directory

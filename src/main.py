@@ -6,7 +6,6 @@ Orchestrates inference runs with Hydra configuration.
 import os
 import sys
 import json
-import argparse
 from pathlib import Path
 
 import hydra
@@ -14,6 +13,32 @@ from omegaconf import DictConfig, OmegaConf
 import wandb
 
 from .inference import run_inference
+
+
+# Convert legacy --flag arguments to Hydra overrides before Hydra processes args
+def preprocess_args():
+    """Convert legacy --sanity_check / --pilot / --main flags to Hydra mode=... overrides."""
+    new_args = []
+    mode_set = False
+    
+    for arg in sys.argv[1:]:
+        if arg == "--sanity_check":
+            new_args.append("mode=sanity_check")
+            mode_set = True
+        elif arg == "--pilot":
+            new_args.append("mode=pilot")
+            mode_set = True
+        elif arg == "--main":
+            new_args.append("mode=main")
+            mode_set = True
+        else:
+            new_args.append(arg)
+    
+    sys.argv[1:] = new_args
+
+
+# Call before Hydra decorator processes arguments
+preprocess_args()
 
 
 def apply_mode_overrides(cfg: DictConfig, mode: str) -> DictConfig:
@@ -99,28 +124,16 @@ def main(cfg: DictConfig) -> None:
     Args:
         cfg: Hydra configuration
     """
-    # Parse command-line arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--main", action="store_true", help="Run in main mode")
-    parser.add_argument("--sanity_check", action="store_true", help="Run in sanity_check mode")
-    parser.add_argument("--pilot", action="store_true", help="Run in pilot mode")
-    args, unknown = parser.parse_known_args()
+    # Get mode from config (set via Hydra overrides like mode=sanity_check)
+    mode = cfg.get("mode", "main")
     
-    # Determine mode
-    if args.sanity_check:
-        mode = "sanity_check"
-    elif args.pilot:
-        mode = "pilot"
-    else:
-        mode = "main"
-    
-    print(f"=== Running {cfg.run.run_id} in {mode} mode ===\n")
+    print(f"=== Running {cfg.run_id} in {mode} mode ===\n")
     
     # Apply mode overrides
     cfg = apply_mode_overrides(cfg, mode)
     
     # Create results directory
-    results_dir = Path(cfg.results_dir) / cfg.run.run_id
+    results_dir = Path(cfg.results_dir) / cfg.run_id
     results_dir.mkdir(parents=True, exist_ok=True)
     
     # Initialize WandB if enabled
@@ -128,8 +141,8 @@ def main(cfg: DictConfig) -> None:
         wandb.init(
             entity=cfg.wandb.entity,
             project=cfg.wandb.project,
-            id=cfg.run.run_id,
-            name=cfg.run.run_id,
+            id=cfg.run_id,
+            name=cfg.run_id,
             config=OmegaConf.to_container(cfg, resolve=True),
             resume="allow",
             mode=cfg.wandb.mode,
