@@ -1,1 +1,29 @@
-# Please list the required python packages.
+[project]
+name = "mpc-autocot"
+version = "0.1.0"
+description = "Metamorphic Proof-Carrying Auto-CoT for prompt-only chain-of-thought"
+requires-python = ">=3.10"
+
+dependencies = [
+    # Core ML frameworks
+    "torch>=2.0.0",
+    "transformers>=4.30.0",
+    "datasets>=2.12.0",
+    
+    # Experiment management
+    "hydra-core>=1.3.0",
+    "wandb>=0.15.0",
+    "omegaconf>=2.3.0",
+    
+    # Embeddings and clustering
+    "sentence-transformers>=2.2.0",
+    "scikit-learn>=1.3.0",
+    
+    # Visualization and analysis
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+    "numpy>=1.24.0",
+    
+    # Utilities
+    "tqdm>=4.65.0",
+]

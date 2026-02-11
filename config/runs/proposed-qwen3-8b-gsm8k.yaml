@@ -1,0 +1,56 @@
+# MPC-AutoCoT: Metamorphic Proof-Carrying Auto-CoT
+# Proposed method with execution gate + deterministic metamorphic robustness
+
+run_id: proposed-qwen3-8b-gsm8k
+
+method:
+  name: MPC-AutoCoT
+  type: proposed
+  description: "Proof-carrying JSON {expr, final} + Python-verifiable execution gate + deterministic metamorphic robustness gate"
+  
+  # Demo selection parameters
+  k_demos: 8  # number of demonstrations to select
+  n_pool: 200  # pool size from training set
+  n_candidates_per_cluster: 10  # candidates to evaluate per cluster
+  
+  # Metamorphic testing
+  metamorphic_variants: 5  # number of meaning-preserving variants per question
+  invariance_threshold: 1.0  # require all variants to pass
+  
+  # Scoring
+  alpha: 0.15  # token penalty weight
+  token_budget: 120  # words-equivalent for penalty calculation
+  
+  # Format
+  demo_format: "expr_only"  # only expr= and #### final (no free-form CoT)
+
+model:
+  name: "Qwen/Qwen2.5-7B-Instruct"  # Using Qwen 2.5 7B as proxy for Qwen3-8B
+  temperature: 0.0
+  max_tokens: 250
+  use_local: true  # run locally on H200
+  device: "cuda"
+  dtype: "bfloat16"
+
+dataset:
+  name: "gsm8k"
+  split: "main"
+  n_test: 200
+  cache_dir: ".cache"
+
+inference:
+  mode: "prompt_only"  # no fine-tuning
+  batch_size: 1
+  num_seeds: 3
+  seeds: [0, 42, 123]
+
+# WandB tracking
+wandb:
+  mode: "online"  # overridden in sanity_check
+  entity: "airas"
+  project: "2026-02-11"
+  tags:
+    - "prompt-tuning"
+    - "chain-of-thought"
+    - "metamorphic-testing"
+    - "gsm8k"

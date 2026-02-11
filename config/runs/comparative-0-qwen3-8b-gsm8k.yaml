@@ -1,0 +1,55 @@
+# Auto-CoT: Clustering + heuristic CoT demo filtering (baseline)
+# Comparative method with diversity clustering and simple length/step heuristics
+
+run_id: comparative-0-qwen3-8b-gsm8k
+
+method:
+  name: Auto-CoT
+  type: comparative
+  description: "Baseline Auto-CoT with clustering for diversity and heuristic acceptance (length/step constraints)"
+  
+  # Demo selection parameters
+  k_demos: 8  # number of demonstrations to select
+  n_pool: 200  # pool size from training set
+  n_candidates_per_cluster: 10  # candidates to evaluate per cluster
+  
+  # Heuristic filtering
+  min_steps: 2  # minimum reasoning steps
+  max_steps: 8  # maximum reasoning steps
+  min_tokens: 20  # minimum demo length
+  max_tokens: 150  # maximum demo length
+  
+  # Format
+  demo_format: "free_form_cot"  # full chain-of-thought reasoning
+
+model:
+  name: "Qwen/Qwen2.5-7B-Instruct"  # Using Qwen 2.5 7B as proxy for Qwen3-8B
+  temperature: 0.0
+  max_tokens: 250
+  use_local: true  # run locally on H200
+  device: "cuda"
+  dtype: "bfloat16"
+
+dataset:
+  name: "gsm8k"
+  split: "main"
+  n_test: 200
+  cache_dir: ".cache"
+
+inference:
+  mode: "prompt_only"  # no fine-tuning
+  batch_size: 1
+  num_seeds: 3
+  seeds: [0, 42, 123]
+
+# WandB tracking
+wandb:
+  mode: "online"  # overridden in sanity_check
+  entity: "airas"
+  project: "2026-02-11"
+  tags:
+    - "prompt-tuning"
+    - "chain-of-thought"
+    - "auto-cot"
+    - "baseline"
+    - "gsm8k"

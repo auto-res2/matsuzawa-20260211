@@ -1,0 +1,27 @@
+# Hydra configuration for MPC-AutoCoT experiments
+# Shared defaults and wandb settings
+
+defaults:
+  - _self_
+
+# WandB configuration
+wandb:
+  entity: "airas"
+  project: "2026-02-11"
+  mode: "online"  # online, offline, or disabled
+
+# Execution mode
+mode: "main"  # main, sanity_check, or pilot
+
+# Results directory
+results_dir: "./results"
+
+# Cache directory
+cache_dir: "./.cache"
+
+# Hydra run directory (prevent clutter)
+hydra:
+  run:
+    dir: ${results_dir}/${run.run_id}
+  job:
+    chdir: false  # don't change working directory
